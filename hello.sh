@@ -1,18 +1,8 @@
 #!/bin/bash
 
-script_name="$(basename "$0")"
-
-echo "Hello from bash!"
-
-echo "The first argument is: $1"
-echo "The second argument is: $2"
-echo "The third argument is: $@"
-echo "The number of arguments is: $#"
-
-# check if a question was provided
+# Check if a question was provided
 if [ $# -eq 0 ]; then
-
-    echo "$0 your question here"
+    echo "Usage: hey your question here"
     exit 1
 fi
 
@@ -23,18 +13,24 @@ if [ -z "$GEMINI_API_KEY" ]; then
     exit 1
 fi
 
-# The user's question
-QUESTION="S*"
+# The user's question (all arguments combined)
+QUESTION="$*"
 
 # Build the prompt
-PROMPT="My instructor just said I need to move this to a git repo, How might I do that?"
+PROMPT="You are a friendly tutor helping a student who has never used the command line or git before. This is their second programming class.
 
 Question: $QUESTION
 
+Instructions:
+- Put any command they should copy on its own line, with no other text on that line
+- Keep explanations simple and jargon-free
+- If you must use a technical term, briefly explain it
+- For simple questions, give just the command and one sentence explaining what it does
+- For complex questions, break it down step by step"
+
 # Call the Gemini API
 RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$GEMINI_API_KEY" \
-  -H "Content-Type: application/json" \echo "Hello from bash!"
-
+  -H "Content-Type: application/json" \
   -d "{
     \"contents\": [{
       \"parts\": [{\"text\": \"$PROMPT\"}]
@@ -42,5 +38,5 @@ RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemi
   }")
 
 # Extract and print the response text
-  echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text'
+echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text'
 
